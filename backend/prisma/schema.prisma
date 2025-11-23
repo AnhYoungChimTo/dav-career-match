@@ -31,14 +31,25 @@ model StudentProfile {
 
 model Job {
   id                Int      @id @default(autoincrement())
-  title             String
-  description       String
-  requiredSkills    String[]
-  requiredKnowledge String[]
-  
-  // Simple matching criteria
-  suitableFaculties String[]
-  suitableMBTI      String[]
-  suitableDISC      String[]
-  suitableInterests String[]
+  slug              String   @unique // job_id
+  title             String   // job_name
+  category          String
+  domain            String
+  shortDescription  String   // short_description
+  responsibilities  String[]
+  hardSkills        String[]
+  softSkills        String[]
+  entryKpis         String[]
+  tools             String[]
+  learningPath      Json     // learning_path_3m
+  internshipProject String   // internship_project
+  archetypesFit     String[] // archetypes_fit
+  marketFitScore    Json     // market_fit_score
+  notes             String?
+
+  // Legacy fields (kept for backward compatibility if needed, or can be mapped)
+  // suitableFaculties String[]
+  // suitableMBTI      String[]
+  // suitableDISC      String[]
+  // suitableInterests String[]
 }

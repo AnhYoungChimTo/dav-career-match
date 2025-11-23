@@ -16,6 +16,11 @@ export class MatchingController {
         return this.matchingService.matchJobs(req.user.id);
     }
 
+    @Get('test/:userId')
+    getMatchesTest(@Param('userId') userId: string) {
+        return this.matchingService.matchJobs(+userId);
+    }
+
     @Get('jobs/:id')
     getJob(@Param('id') id: string) {
         return this.jobService.findOne(+id);

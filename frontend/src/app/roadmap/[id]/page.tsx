@@ -10,20 +10,23 @@ import Link from "next/link";
 export default function RoadmapPage() {
     const params = useParams();
     const [job, setJob] = useState<any>(null);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchJob = async () => {
             try {
                 const res = await api.get(`/matching/jobs/${params.id}`);
                 setJob(res.data);
-            } catch (err) {
+            } catch (err: any) {
                 console.error("Failed to fetch job", err);
+                setError(err.message || "Failed to load job details");
             }
         };
         if (params.id) fetchJob();
     }, [params.id]);
 
-    if (!job) return <div className="p-8">Loading...</div>;
+    if (error) return <div className="p-8 text-red-500">Error loading job: {error}</div>;
+    if (!job) return <div className="p-8">Loading Job Details... (ID: {params.id})</div>;
 
     return (
         <div className="min-h-screen bg-gray-50 p-8">
@@ -34,24 +37,24 @@ export default function RoadmapPage() {
 
                 <div className="space-y-2">
                     <h1 className="text-3xl font-bold">{job.title}</h1>
-                    <p className="text-gray-600">{job.description}</p>
+                    <p className="text-gray-600">{job.shortDescription}</p>
                 </div>
 
-                {/* Gap Analysis (Mocked Visuals for MVP) */}
+                {/* Skills & Tools */}
                 <div className="grid md:grid-cols-2 gap-6">
                     <Card>
                         <CardHeader>
-                            <CardTitle>Skill Gap Analysis</CardTitle>
+                            <CardTitle>Hard Skills</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            {job.requiredSkills.map((skill: string, i: number) => (
+                            {job.hardSkills?.map((skill: string) => (
                                 <div key={skill}>
                                     <div className="flex justify-between text-sm mb-1">
                                         <span>{skill}</span>
-                                        <span className="text-gray-500">Missing</span>
+                                        <span className="text-gray-500">Target</span>
                                     </div>
                                     <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                                        <div className="h-full bg-red-400 w-[20%]"></div>
+                                        <div className="h-full bg-blue-400 w-[60%]"></div>
                                     </div>
                                 </div>
                             ))}
@@ -60,43 +63,51 @@ export default function RoadmapPage() {
 
                     <Card>
                         <CardHeader>
-                            <CardTitle>Knowledge Gap</CardTitle>
+                            <CardTitle>Tools & Soft Skills</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            {job.requiredKnowledge.map((k: string) => (
-                                <div key={k} className="p-3 bg-yellow-50 border border-yellow-100 rounded-md text-sm">
-                                    <span className="font-semibold block text-yellow-800">Gap Identified</span>
-                                    Need to acquire knowledge in {k}.
+                            <div className="mb-4">
+                                <h4 className="font-semibold mb-2 text-sm">Tools</h4>
+                                <div className="flex flex-wrap gap-2">
+                                    {job.tools?.map((t: string) => (
+                                        <span key={t} className="px-2 py-1 bg-gray-100 rounded text-xs">{t}</span>
+                                    ))}
                                 </div>
-                            ))}
+                            </div>
+                            <div>
+                                <h4 className="font-semibold mb-2 text-sm">Soft Skills</h4>
+                                <div className="flex flex-wrap gap-2">
+                                    {job.softSkills?.map((s: string) => (
+                                        <span key={s} className="px-2 py-1 bg-green-50 text-green-700 border border-green-100 rounded text-xs">{s}</span>
+                                    ))}
+                                </div>
+                            </div>
                         </CardContent>
                     </Card>
                 </div>
 
-                {/* Roadmap */}
+                {/* 3-Month Learning Path */}
                 <Card>
                     <CardHeader>
-                        <CardTitle>Your Personalized Roadmap</CardTitle>
+                        <CardTitle>3-Month Learning Path</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="relative border-l-2 border-gray-200 ml-3 space-y-8 py-4">
-                            {job.requiredSkills.map((skill: string, i: number) => (
-                                <div key={skill} className="relative pl-8">
+                            {job.learningPath && Object.entries(job.learningPath).map(([month, activity]: [string, any]) => (
+                                <div key={month} className="relative pl-8">
                                     <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-primary border-4 border-white"></div>
-                                    <h4 className="font-bold text-lg">Learn {skill}</h4>
+                                    <h4 className="font-bold text-lg capitalize">{month.replace(/(\d+)/, ' $1')}</h4>
                                     <p className="text-gray-600 text-sm mt-1">
-                                        Recommended Course: "Introduction to {skill} for Beginners" (Coursera/Udemy)
+                                        {activity}
                                     </p>
-                                    <span className="inline-block mt-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                                        Estimated time: 2 weeks
-                                    </span>
                                 </div>
                             ))}
+
                             <div className="relative pl-8">
                                 <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-green-500 border-4 border-white"></div>
-                                <h4 className="font-bold text-lg">Apply for Internship</h4>
+                                <h4 className="font-bold text-lg">Internship Project</h4>
                                 <p className="text-gray-600 text-sm mt-1">
-                                    Once you have completed the above steps, start applying for intern positions at NGOs or Embassies.
+                                    {job.internshipProject}
                                 </p>
                             </div>
                         </div>

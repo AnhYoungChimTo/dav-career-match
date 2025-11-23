@@ -1,0 +1,44 @@
+// backend/prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  
+  profile      StudentProfile?
+}
+
+model StudentProfile {
+  id        Int     @id @default(autoincrement())
+  userId    Int     @unique
+  user      User    @relation(fields: [userId], references: [id])
+  
+  faculty   String  // Knowledge Domain
+  mbti      String?
+  disc      String?
+  interests String[] // Stored as array of strings
+}
+
+model Job {
+  id                Int      @id @default(autoincrement())
+  title             String
+  description       String
+  requiredSkills    String[]
+  requiredKnowledge String[]
+  
+  // Simple matching criteria
+  suitableFaculties String[]
+  suitableMBTI      String[]
+  suitableDISC      String[]
+  suitableInterests String[]
+}
